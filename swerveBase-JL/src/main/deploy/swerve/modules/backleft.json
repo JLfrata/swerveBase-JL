@@ -1,0 +1,28 @@
+{
+  "location": {
+    "front": -10.25,
+    "left": 10.25
+  },
+  "absoluteEncoderOffset": 115.0,
+  "drive": {
+    "type": "falcon",
+    "id": 4,
+    "canbus": "rio"
+  },
+
+  "angle": {
+    "type": "falcon",
+    "id": 8,
+    "canbus": "rio"
+  },
+  "encoder": {
+    "type": "cancoder",
+    "id": 14,
+    "canbus": "rio"
+  },
+  "inverted": {
+    "drive": true,
+    "angle": true
+  },
+  "absoluteEncoderInverted": false
+}

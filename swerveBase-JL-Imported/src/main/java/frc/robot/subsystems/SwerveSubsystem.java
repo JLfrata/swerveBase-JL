@@ -24,7 +24,6 @@ import edu.wpi.first.math.util.Units;
 
 public class SwerveSubsystem extends SubsystemBase {
 
-  double maximumSpeed = Units.feetToMeters(4.5);
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   SwerveDrive swerveDrive;
   CANcoder frontleft = new CANcoder(11);
@@ -43,7 +42,7 @@ public class SwerveSubsystem extends SubsystemBase {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    swerveDrive.setGyroOffset(new Rotation3d(0, 0, Units.radiansToDegrees(90)));
+    swerveDrive.setGyroOffset(new Rotation3d(0, 0, Units.radiansToDegrees(0)));
   }
 
   public Command driveTeleOp(DoubleSupplier translationX, DoubleSupplier translationY,
@@ -60,7 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command resetGyro() {
     return new InstantCommand(() -> {
       swerveDrive.setGyro(new Rotation3d(0, 0, 0));
-      swerveDrive.setGyroOffset(new Rotation3d(0, 0, Units.radiansToDegrees(90)));
+      
     });
   }
 
@@ -73,6 +72,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public boolean exampleCondition() {
+    
     return false;
   }
 
@@ -104,7 +104,9 @@ public class SwerveSubsystem extends SubsystemBase {
         
     SmartDashboard.putNumber("Swerve/Encoder Absoluto BR", 
         swerveDrive.getModules()[3].getAbsolutePosition()); // Back Right
-    }
+    SmartDashboard.putNumber("X: ", swerveDrive.getPose().getX());
+    SmartDashboard.putNumber("Y: ", swerveDrive.getPose().getY());
+      }
   }
 
   @Override

@@ -9,11 +9,13 @@ import static edu.wpi.first.units.Units.Meter;
 
 import java.io.File;
 
+import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix6.hardware.CANcoder;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.SwerveDrive;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,6 +32,7 @@ public class SwerveSubsystem extends SubsystemBase {
   CANcoder frontright = new CANcoder(12);
   CANcoder backleft = new CANcoder(14);
   CANcoder backright = new CANcoder(13);
+  PigeonIMU pigeonIMU = new PigeonIMU(20);
 
   public SwerveSubsystem() {
 
@@ -38,6 +41,8 @@ public class SwerveSubsystem extends SubsystemBase {
           new Translation2d(Meter.of(1),
               Meter.of(4)),
           Rotation2d.fromDegrees(0)));
+          
+
 
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -56,10 +61,20 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  public Command resetGyro() {
+  public void updatePigeonRotation() {
+    swerveDrive.setGyro(new Rotation3d(pigeonIMU.getRoll(), pigeonIMU.getPitch(), pigeonIMU.getYaw()));
+  }
+
+  public Command resetGyroPigeon() {
     return new InstantCommand(() -> {
       swerveDrive.setGyro(new Rotation3d(0, 0, 0));
-      
+      pigeonIMU.setYaw(0);
+    });
+  }
+
+  public Command resetGyroNavx() {
+    return new InstantCommand(() -> {
+      swerveDrive.setGyro(new Rotation3d(0, 0, 0));
     });
   }
 
@@ -88,6 +103,8 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     if(swerveDrive != null){
+      updatePigeonRotation();
+
       SmartDashboard.putNumber("FR CanCoder", getCancoderDegrees(frontright));
       SmartDashboard.putNumber("FL CanCoder", getCancoderDegrees(frontleft));
       SmartDashboard.putNumber("BR CanCoder", getCancoderDegrees(backright));

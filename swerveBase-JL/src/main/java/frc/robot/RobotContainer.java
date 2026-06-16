@@ -39,7 +39,7 @@ public class RobotContainer {
       controller::getLeftY,
       controller::getLeftX,
       controller::getRightX));
-    new JoystickButton(controller, PS4Controller.Button.kSquare.value).onTrue(swerveBase.resetGyro()); 
+    new JoystickButton(controller, PS4Controller.Button.kSquare.value).onTrue(swerveBase.resetGyroPigeon()); 
     
   }
 

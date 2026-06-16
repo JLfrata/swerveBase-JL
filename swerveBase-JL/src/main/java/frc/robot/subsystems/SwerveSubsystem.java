@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import swervelib.parser.SwerveParser;
 import swervelib.SwerveDrive;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +24,6 @@ import edu.wpi.first.math.util.Units;
 
 public class SwerveSubsystem extends SubsystemBase {
 
-  double maximumSpeed = Units.feetToMeters(4.5);
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
   SwerveDrive swerveDrive;
   CANcoder frontleft = new CANcoder(11);
@@ -42,7 +42,7 @@ public class SwerveSubsystem extends SubsystemBase {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
+    swerveDrive.setGyroOffset(new Rotation3d(0, 0, Units.radiansToDegrees(0)));
   }
 
   public Command driveTeleOp(DoubleSupplier translationX, DoubleSupplier translationY,
@@ -59,6 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command resetGyro() {
     return new InstantCommand(() -> {
       swerveDrive.setGyro(new Rotation3d(0, 0, 0));
+      
     });
   }
 
@@ -71,14 +72,41 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public boolean exampleCondition() {
+    
     return false;
   }
+
+  // public double getCancoderRotations(CANcoder cancoder){
+  //   return cancoder.getAbsolutePosition().getValueAsDouble();
+  // }
+
+  public double getCancoderDegrees(CANcoder cancoder) {
+    double rotations = cancoder.getAbsolutePosition().getValueAsDouble();
+    return rotations * 360.0;
+}
 
   @Override
   public void periodic() {
     if(swerveDrive != null){
-      
-    }
+      SmartDashboard.putNumber("FR CanCoder", getCancoderDegrees(frontright));
+      SmartDashboard.putNumber("FL CanCoder", getCancoderDegrees(frontleft));
+      SmartDashboard.putNumber("BR CanCoder", getCancoderDegrees(backright));
+      SmartDashboard.putNumber("BL CanCoder", getCancoderDegrees(backleft));
+          SmartDashboard.putNumber("Swerve/Encoder Absoluto FL",
+
+        swerveDrive.getModules()[0].getAbsolutePosition()); // Front Left
+        
+    SmartDashboard.putNumber("Swerve/Encoder Absoluto FR", 
+        swerveDrive.getModules()[1].getAbsolutePosition()); // Front Right
+        
+    SmartDashboard.putNumber("Swerve/Encoder Absoluto BL", 
+        swerveDrive.getModules()[2].getAbsolutePosition()); // Back Left
+        
+    SmartDashboard.putNumber("Swerve/Encoder Absoluto BR", 
+        swerveDrive.getModules()[3].getAbsolutePosition()); // Back Right
+    SmartDashboard.putNumber("X: ", swerveDrive.getPose().getX());
+    SmartDashboard.putNumber("Y: ", swerveDrive.getPose().getY());
+      }
   }
 
   @Override

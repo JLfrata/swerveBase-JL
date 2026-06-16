@@ -36,10 +36,11 @@ public class RobotContainer {
       
   private void configureBindings() {
     swerveBase.setDefaultCommand(swerveBase.driveTeleOp(
-      controller::getLeftX,
       controller::getLeftY,
+      controller::getLeftX,
       controller::getRightX));
-    new JoystickButton(controller, PS4Controller.Button.kCross.value).onTrue(swerveBase.resetGyro()); 
+    new JoystickButton(controller, PS4Controller.Button.kSquare.value).onTrue(swerveBase.resetGyro()); 
+    
   }
 
   public Command getAutonomousCommand() {

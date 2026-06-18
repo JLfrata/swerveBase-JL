@@ -5,7 +5,6 @@
 package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import swervelib.SwerveInputStream;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -18,21 +17,6 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
   }
-
-  // SwerveInputStream driveAngularVelocity = SwerveInputStream.of(swerveBase.getSwerveDrive(),
-  //     () -> controller.getLeftY() * -0.8,
-  //     () -> controller.getLeftX() * -0.8)
-  //     .withControllerRotationAxis(controller::getRightX)
-  //     .deadband(0.05)
-  //     .scaleTranslation(0.8)
-  //     .allianceRelativeControl(true);
-
-  // SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(controller::getRightX,
-  //     controller::getRightY)
-  //     .headingWhile(true);
-      
-  //     Command driveFieldOrientedDirectAngle = swerveBase.driveFieldOriented(driveDirectAngle);
-  //     Command driveFieldOrientedDirectAngle = swerveBase.driveFieldOriented(driveDirectAngle);
       
   private void configureBindings() {
     swerveBase.setDefaultCommand(swerveBase.driveTeleOp(
@@ -40,6 +24,7 @@ public class RobotContainer {
       controller::getLeftX,
       controller::getRightX));
     new JoystickButton(controller, PS4Controller.Button.kSquare.value).onTrue(swerveBase.resetGyroPigeon()); 
+    new JoystickButton(controller, PS4Controller.Button.kCircle.value).onTrue(swerveBase.resetPoseByAlliance());
     
   }
 

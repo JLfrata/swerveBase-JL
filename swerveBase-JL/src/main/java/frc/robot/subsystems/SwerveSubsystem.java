@@ -5,28 +5,27 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-import static edu.wpi.first.units.Units.Meter;
-
 import java.io.File;
 
 import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix6.hardware.CANcoder;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.SwerveDrive;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 
 public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(), "swerve");
+  private static final Pose2d bluePose = new Pose2d(3.560, 4.035, new Rotation2d(0));
+  private static final Pose2d redPose  = new Pose2d(12.977, 4.035, new Rotation2d(Math.toRadians(0)));
   SwerveDrive swerveDrive;
   CANcoder frontleft = new CANcoder(11);
   CANcoder frontright = new CANcoder(12);
@@ -37,28 +36,34 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveSubsystem() {
 
     try {
-      swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED, new Pose2d(
-          new Translation2d(Meter.of(1),
-              Meter.of(4)),
-          Rotation2d.fromDegrees(0)));
+      swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED);
+      this.swerveDrive.setModuleEncoderAutoSynchronize(true, 1);
           
-
-
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    swerveDrive.setGyroOffset(new Rotation3d(0, 0, Units.radiansToDegrees(0)));
+    swerveDrive.setGyro(new Rotation3d(0, 0, 0));
   }
 
   public Command driveTeleOp(DoubleSupplier translationX, DoubleSupplier translationY,
       DoubleSupplier angularRotationX) {
     return run(() -> {
-      swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
+          swerveDrive.drive(new Translation2d(translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
           translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()),
           angularRotationX.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
           true,
           false);
     });
+  }
+  
+  public double getHeading() {
+    return pigeonIMU.getYaw();
+  }
+  public Pose2d getPose() {
+    return swerveDrive.getPose();
+  }
+  public void resetOdometry(Pose2d pose) {
+    swerveDrive.resetOdometry(pose);
   }
 
   public void updatePigeonRotation() {
@@ -91,19 +96,24 @@ public class SwerveSubsystem extends SubsystemBase {
     return false;
   }
 
-  // public double getCancoderRotations(CANcoder cancoder){
-  //   return cancoder.getAbsolutePosition().getValueAsDouble();
-  // }
-
   public double getCancoderDegrees(CANcoder cancoder) {
     double rotations = cancoder.getAbsolutePosition().getValueAsDouble();
     return rotations * 360.0;
-}
+  }
+
+  public Command resetPoseByAlliance(){
+    return new InstantCommand(() -> {
+      var alliance = DriverStation.getAlliance();
+      Pose2d inicialPose = (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Blue)
+      ? bluePose
+      : redPose;
+      this.resetOdometry(inicialPose);
+    });
+  }
 
   @Override
   public void periodic() {
     if(swerveDrive != null){
-      updatePigeonRotation();
 
       SmartDashboard.putNumber("FR CanCoder", getCancoderDegrees(frontright));
       SmartDashboard.putNumber("FL CanCoder", getCancoderDegrees(frontleft));
